@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trò Chơi Thám Tử Từ Vựng Lớp 5</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+        }
+        .game-container {
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+        }
+        .game-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .game-status {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .detective-container {
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            min-height: 150px;
+            margin-bottom: 2rem;
+        }
+        .detective-image {
+            width: 150px;
+            height: auto;
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%);
+            animation: appear 1s ease-in-out;
+            z-index: 50;
+        }
+        .crime-image {
+            width: 100px;
+            height: auto;
+            position: absolute;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 40;
+            display: none;
+        }
+        @keyframes appear {
+            from { opacity: 0; transform: scale(0.5) translateX(-50%); }
+            to { opacity: 1; transform: scale(1) translateX(-50%); }
+        }
+        @keyframes escape {
+            from { bottom: 0; left: 50%; opacity: 1; transform: translateX(-50%); }
+            to { bottom: 300px; left: 150%; opacity: 0; transform: translateX(-50%); }
+        }
+        .word-display {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 5px;
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+        .clue-box {
+            background-color: #f7fafc;
+            border: 2px solid #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            width: 100%;
+            text-align: center;
+        }
+        .clue-text {
+            font-size: 1.25rem;
+            font-style: italic;
+            color: #2d3748;
+        }
+        .word-input-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            width: 100%;
+        }
+        .word-input {
+            width: 100%;
+            max-width: 500px;
+            padding: 0.75rem;
+            border: 2px solid #cbd5e0;
+            border-radius: 9999px;
+            font-size: 1rem;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .word-input:focus {
+            outline: none;
+            border-color: #63b3ed;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+        }
+        .button {
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .button:hover:enabled {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        .button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .guess-button {
+            background-color: #2563eb;
+            color: white;
+        }
+        .end-game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        .win-message {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #48bb78;
+            margin-bottom: 1rem;
+        }
+        .lose-message {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #dc2626;
+            margin-bottom: 1rem;
+        }
+        .medal-image {
+            width: 150px;
+            height: auto;
+            margin-top: 2rem;
+            animation: pop-in 1s ease-in-out;
+        }
+        @keyframes pop-in {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">🕵️‍♂️ Thám Tử Từ Vựng</h1>
+        <p id="game-status" class="game-status">Vụ án: 1/10. Tiền thưởng: $0</p>
+        
+        <div class="detective-container">
+            <img src="https://placehold.co/150x200/4a5568/FFFFFF?text=Detective" alt="Hình ảnh thám tử" class="detective-image">
+            <img src="https://placehold.co/100x100/dc2626/FFFFFF?text=Crime" alt="Hình ảnh tội phạm" class="crime-image">
+        </div>
+
+        <p id="word-display" class="word-display">_ _ _ _ _</p>
+
+        <div class="clue-box">
+            <p class="font-bold text-lg mb-2">Gợi ý:</p>
+            <p id="clue-text" class="clue-text">Bạn đã sẵn sàng chưa?</p>
+            <button id="next-hint-button" class="button guess-button mt-4 hidden">Gợi ý tiếp theo (-$30)</button>
+        </div>
+
+        <div class="word-input-container">
+            <input type="text" id="word-input" class="word-input" placeholder="Nhập từ cần đoán..." autofocus>
+            <button id="guess-button" class="button guess-button">Đoán</button>
+        </div>
+        
+        <div id="end-game-container" class="end-game-container hidden">
+            <h2 id="final-message" class="win-message"></h2>
+            <p id="final-score" class="text-xl mt-2"></p>
+            <img id="medal-image" src="https://placehold.co/150x150/f6ad55/FFFFFF?text=Medal" alt="Huy chương chiến thắng" class="medal-image hidden">
+            <button id="restart-button" class="button guess-button mt-4">Chơi Lại</button>
+        </div>
+    </div>
+    
+    <script>
+        const words = [
+            { word: "CHAIR", hints: ["Nội thất", "Làm bằng gỗ", "Dùng để ngồi"] },
+            { word: "TABLE", hints: ["Nội thất", "Có 4 chân", "Dùng để ăn cơm"] },
+            { word: "BEDROOM", hints: ["Một phòng trong nhà", "Dùng để ngủ", "Thường có giường"] },
+            { word: "FAMILY", hints: ["Có bố, mẹ, con cái", "Nơi bạn sống", "Một nhóm người thân"] },
+            { word: "SCHOOL", hints: ["Nơi bạn học tập", "Có nhiều giáo viên và học sinh", "Có sân chơi"] },
+            { word: "FRIEND", hints: ["Người bạn thích chơi cùng", "Không phải người thân", "Luôn giúp đỡ bạn"] },
+            { word: "READING", hints: ["Một sở thích", "Cần một cuốn sách", "Bạn làm điều này trong thư viện"] },
+            { word: "TENNIS", hints: ["Một môn thể thao", "Cần vợt và bóng", "Chơi trên sân có lưới"] },
+            { word: "BICYCLE", hints: ["Một phương tiện giao thông", "Có hai bánh", "Bạn phải đạp bằng chân"] },
+            { word: "LIBRARY", hints: ["Một tòa nhà công cộng", "Nơi có rất nhiều sách", "Bạn cần giữ im lặng ở đây"]
+        }];
+
+        let currentWordIndex = 0;
+        let score = 0;
+        let currentHints = [];
+        let hintIndex = 0;
+
+        const gameStatusEl = document.getElementById('game-status');
+        const wordDisplayEl = document.getElementById('word-display');
+        const clueTextEl = document.getElementById('clue-text');
+        const wordInputEl = document.getElementById('word-input');
+        const guessButtonEl = document.getElementById('guess-button');
+        const nextHintButtonEl = document.getElementById('next-hint-button');
+        const detectiveImageEl = document.querySelector('.detective-image');
+        const crimeImageEl = document.querySelector('.crime-image');
+        const endContainerEl = document.getElementById('end-game-container');
+        const finalMessageEl = document.getElementById('final-message');
+        const finalScoreEl = document.getElementById('final-score');
+        const medalImageEl = document.getElementById('medal-image');
+        const restartButtonEl = document.getElementById('restart-button');
+
+        function initGame() {
+            currentWordIndex = 0;
+            score = 0;
+            detectiveImageEl.style.display = 'block';
+            endContainerEl.classList.add('hidden');
+            wordInputEl.classList.remove('hidden');
+            guessButtonEl.classList.remove('hidden');
+            nextHintButtonEl.classList.add('hidden');
+            showNextWord();
+        }
+
+        function showNextWord() {
+            if (currentWordIndex >= words.length) {
+                endGame(true);
+                return;
+            }
+            
+            const currentWord = words[currentWordIndex];
+            wordDisplayEl.textContent = "_ ".repeat(currentWord.word.length);
+            currentHints = currentWord.hints;
+            hintIndex = 0;
+            clueTextEl.textContent = currentHints[hintIndex];
+            wordInputEl.value = '';
+            wordInputEl.focus();
+            gameStatusEl.textContent = `Vụ án: ${currentWordIndex + 1}/${words.length}. Tiền thưởng: $${score}`;
+            nextHintButtonEl.classList.remove('hidden');
+            updateHintButton();
+        }
+
+        function handleGuess() {
+            const userGuess = wordInputEl.value.toUpperCase().trim();
+            const currentWord = words[currentWordIndex].word.toUpperCase();
+
+            if (userGuess === currentWord) {
+                score += 100;
+                showMessageBox('Chính xác! Bạn nhận được $100!', 'success');
+                wordDisplayEl.textContent = currentWord;
+                currentWordIndex++;
+                setTimeout(showNextWord, 2000);
+            } else {
+                score -= 30;
+                if (score < 0) {
+                    endGame(false);
+                } else {
+                    crimeImageEl.style.display = 'block';
+                    crimeImageEl.style.animation = 'escape 2s forwards';
+                    showMessageBox('Sai rồi! Bạn mất $30. Tội phạm đã chạy mất!', 'error');
+                    setTimeout(() => {
+                        crimeImageEl.style.display = 'none';
+                    }, 2000);
+                    updateHintButton();
+                }
+            }
+            gameStatusEl.textContent = `Vụ án: ${currentWordIndex + 1}/${words.length}. Tiền thưởng: $${score}`;
+        }
+        
+        function updateHintButton() {
+            hintIndex++;
+            if (hintIndex < currentHints.length) {
+                nextHintButtonEl.textContent = `Gợi ý tiếp theo (-$30)`;
+            } else {
+                nextHintButtonEl.classList.add('hidden');
+            }
+        }
+        
+        function handleNextHint() {
+            score -= 30;
+            if (score < 0) {
+                endGame(false);
+            } else {
+                clueTextEl.textContent = currentHints[hintIndex];
+                hintIndex++;
+                updateHintButton();
+            }
+            gameStatusEl.textContent = `Vụ án: ${currentWordIndex + 1}/${words.length}. Tiền thưởng: $${score}`;
+        }
+
+        function endGame(isWin) {
+            wordInputEl.classList.add('hidden');
+            guessButtonEl.classList.add('hidden');
+            nextHintButtonEl.classList.add('hidden');
+            detectiveImageEl.style.display = 'none';
+            endContainerEl.classList.remove('hidden');
+
+            if (isWin) {
+                score += 500;
+                finalMessageEl.textContent = "🎉 Chúc mừng! Bạn đã phá tất cả các vụ án!";
+                finalScoreEl.textContent = `Bạn nhận được thêm $500. Tổng tiền thưởng: $${score}.`;
+                finalMessageEl.classList.add('win-message');
+                medalImageEl.classList.remove('hidden');
+            } else {
+                finalMessageEl.textContent = "Game Over!";
+                finalScoreEl.textContent = `Số tiền của bạn đã hết. Hãy thử lại!`;
+                finalMessageEl.classList.add('lose-message');
+            }
+        }
+
+        function showMessageBox(message, type) {
+            const messageBox = document.createElement('div');
+            messageBox.className = 'message-box';
+            
+            const messageText = document.createElement('p');
+            messageText.textContent = message;
+            messageText.className = 'text-xl font-bold mb-4';
+            messageBox.appendChild(messageText);
+
+            document.body.appendChild(messageBox);
+            setTimeout(() => {
+                messageBox.remove();
+            }, 1500);
+        }
+        
+        guessButtonEl.addEventListener('click', handleGuess);
+        nextHintButtonEl.addEventListener('click', handleNextHint);
+        wordInputEl.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') {
+                handleGuess();
+            }
+        });
+        restartButtonEl.addEventListener('click', initGame);
+
+        initGame();
+    </script>
+</body>
+</html>
